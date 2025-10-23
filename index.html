@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Timer</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #1e1e1e;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+  input, button {
+    padding: 10px;
+    margin: 5px;
+    font-size: 16px;
+  }
+  #timer {
+    font-size: 48px;
+    margin: 20px 0;
+  }
+  #concentration {
+    font-size: 24px;
+    margin: 10px 0;
+  }
+  #message {
+    font-size: 20px;
+    margin-top: 10px;
+    text-align: center;
+    max-width: 80%;
+  }
+</style>
+</head>
+<body>
+
+<h1>Focus Timer</h1>
+<input type="number" id="focusTime" placeholder="Temps en minutes" min="1">
+<button id="startBtn">Démarrer</button>
+
+<div id="timer">00:00:00</div>
+<div id="concentration">Concentration : 100%</div>
+<div id="message">Reste concentré !</div>
+
+<script>
+let totalTime = 0;
+let remainingTime = 0;
+let concentration = 100;
+let interval;
+let lostFocusCount = 0;
+
+const timerEl = document.getElementById('timer');
+const concentrationEl = document.getElementById('concentration');
+const messageEl = document.getElementById('message');
+const startBtn = document.getElementById('startBtn');
+
+function formatTime(seconds) {
+  const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+  const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+  const s = (seconds % 60).toString().padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
+
+function updateMessage() {
+  if (concentration > 80) {
+    messageEl.textContent = "Super concentré, continue comme ça !";
+  } else if (concentration > 60) {
+    messageEl.textContent = "Attention, tu perds un peu de concentration...";
+  } else if (concentration > 40) {
+    messageEl.textContent = "Tu te déconcentres beaucoup, recentre-toi !";
+  } else {
+    messageEl.textContent = "Oh non, tu as presque perdu toute ta concentration !";
+  }
+}
+
+function startFocus() {
+  const minutes = parseInt(document.getElementById('focusTime').value);
+  if (isNaN(minutes) || minutes <= 0) return alert("Entre un nombre valide de minutes !");
+  
+  totalTime = minutes * 60;
+  remainingTime = totalTime;
+  concentration = 100;
+  lostFocusCount = 0;
+  
+  timerEl.textContent = formatTime(remainingTime);
+  concentrationEl.textContent = `Concentration : ${concentration}%`;
+  updateMessage();
+  
+  interval = setInterval(() => {
+    remainingTime--;
+    timerEl.textContent = formatTime(remainingTime);
+    if (remainingTime <= 0) {
+      clearInterval(interval);
+      messageEl.textContent = "Session terminée ! Bravo !";
+    }
+  }, 1000);
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    lostFocusCount++;
+    concentration -= 10;
+    if (concentration < 0) concentration = 0;
+    concentrationEl.textContent = `Concentration : ${concentration}%`;
+    updateMessage();
+  }
+});
+
+startBtn.addEventListener('click', startFocus);
+</script>
+
+</body>
+</html>
