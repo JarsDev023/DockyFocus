@@ -1,118 +1,543 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Focus Timer</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #1e1e1e;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    margin: 0;
-  }
-  input, button {
-    padding: 10px;
-    margin: 5px;
-    font-size: 16px;
-  }
-  #timer {
-    font-size: 48px;
-    margin: 20px 0;
-  }
-  #concentration {
-    font-size: 24px;
-    margin: 10px 0;
-  }
-  #message {
-    font-size: 20px;
-    margin-top: 10px;
-    text-align: center;
-    max-width: 80%;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Timer</title>
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --secondary: #3f37c9;
+      --success: #4cc9f0;
+      --danger: #f72585;
+      --warning: #f8961e;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --gray: #6c757d;
+      --gray-light: #e9ecef;
+      --transition: all 0.3s ease;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light);
+      color: var(--dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      transition: var(--transition);
+    }
+
+    body.dark-mode {
+      background-color: var(--dark);
+      color: var(--light);
+    }
+
+    .container {
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+      padding: 2rem;
+      background-color: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+    }
+
+    body.dark-mode .container {
+      background-color: #2d3748;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+    }
+
+    .input-group {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+      gap: 10px;
+    }
+
+    input {
+      padding: 12px 16px;
+      font-size: 1rem;
+      border: 2px solid var(--gray-light);
+      border-radius: 8px;
+      width: 120px;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    body.dark-mode input {
+      background-color: #4a5568;
+      border-color: #4a5568;
+      color: var(--light);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--secondary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-secondary {
+      background-color: var(--gray-light);
+      color: var(--dark);
+    }
+
+    body.dark-mode .btn-secondary {
+      background-color: #4a5568;
+      color: var(--light);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--gray);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-danger {
+      background-color: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #d90467;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .timer-display {
+      font-size: 4rem;
+      font-weight: 700;
+      margin: 1.5rem 0;
+      font-family: 'Courier New', monospace;
+      color: var(--primary);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-mode .timer-display {
+      color: var(--success);
+    }
+
+    .concentration-container {
+      margin: 1.5rem 0;
+    }
+
+    .concentration-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+
+    body.dark-mode .concentration-label {
+      color: #a0aec0;
+    }
+
+    .concentration-bar {
+      height: 12px;
+      background-color: var(--gray-light);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    body.dark-mode .concentration-bar {
+      background-color: #4a5568;
+    }
+
+    .concentration-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success), var(--primary-light));
+      border-radius: 6px;
+      transition: width 0.5s ease;
+    }
+
+    .message-container {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      border-radius: 8px;
+      background-color: var(--gray-light);
+      transition: var(--transition);
+    }
+
+    body.dark-mode .message-container {
+      background-color: #4a5568;
+    }
+
+    .message {
+      font-size: 1.1rem;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .message.high {
+      color: var(--success);
+    }
+
+    .message.medium {
+      color: var(--warning);
+    }
+
+    .message.low {
+      color: var(--danger);
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--gray-light);
+    }
+
+    body.dark-mode .stats {
+      border-top-color: #4a5568;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--gray);
+      margin-top: 4px;
+    }
+
+    body.dark-mode .stat-label {
+      color: #a0aec0;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: var(--gray);
+      transition: var(--transition);
+    }
+
+    body.dark-mode .theme-toggle {
+      color: var(--light);
+    }
+
+    .theme-toggle:hover {
+      color: var(--primary);
+      transform: rotate(30deg);
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .focus-lost {
+      animation: pulse 0.5s ease;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 1.5rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .timer-display {
+        font-size: 3rem;
+      }
+      
+      .input-group {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      input {
+        width: 100%;
+        max-width: 200px;
+      }
+    }
+  </style>
 </head>
 <body>
-
-<h1>Focus Timer</h1>
-<input type="number" id="focusTime" placeholder="Temps en minutes" min="1">
-<button id="startBtn">Démarrer</button>
-
-<div id="timer">00:00:00</div>
-<div id="concentration">Concentration : 100%</div>
-<div id="message">Reste concentré !</div>
-
-<script>
-let totalTime = 0;
-let remainingTime = 0;
-let concentration = 100;
-let interval;
-let lostFocusCount = 0;
-
-const timerEl = document.getElementById('timer');
-const concentrationEl = document.getElementById('concentration');
-const messageEl = document.getElementById('message');
-const startBtn = document.getElementById('startBtn');
-
-function formatTime(seconds) {
-  const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
-  const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-  const s = (seconds % 60).toString().padStart(2, '0');
-  return `${h}:${m}:${s}`;
-}
-
-function updateMessage() {
-  if (concentration > 80) {
-    messageEl.textContent = "Super concentré, continue comme ça !";
-  } else if (concentration > 60) {
-    messageEl.textContent = "Attention, tu perds un peu de concentration...";
-  } else if (concentration > 40) {
-    messageEl.textContent = "Tu te déconcentres beaucoup, recentre-toi !";
-  } else {
-    messageEl.textContent = "Oh non, tu as presque perdu toute ta concentration !";
-  }
-}
-
-function startFocus() {
-  const minutes = parseInt(document.getElementById('focusTime').value);
-  if (isNaN(minutes) || minutes <= 0) return alert("Entre un nombre valide de minutes !");
+  <button class="theme-toggle" id="themeToggle">🌙</button>
   
-  totalTime = minutes * 60;
-  remainingTime = totalTime;
-  concentration = 100;
-  lostFocusCount = 0;
-  
-  timerEl.textContent = formatTime(remainingTime);
-  concentrationEl.textContent = `Concentration : ${concentration}%`;
-  updateMessage();
-  
-  interval = setInterval(() => {
-    remainingTime--;
-    timerEl.textContent = formatTime(remainingTime);
-    if (remainingTime <= 0) {
-      clearInterval(interval);
-      messageEl.textContent = "Session terminée ! Bravo !";
+  <div class="container">
+    <h1>Focus Timer</h1>
+    
+    <div class="input-group">
+      <input type="number" id="focusTime" placeholder="Minutes" min="1" value="25">
+      <button class="btn btn-primary" id="startBtn">
+        <span>Démarrer</span>
+      </button>
+    </div>
+    
+    <div id="timer" class="timer-display">25:00</div>
+    
+    <div class="concentration-container">
+      <div class="concentration-label">
+        <span>Concentration</span>
+        <span id="concentrationValue">100%</span>
+      </div>
+      <div class="concentration-bar">
+        <div id="concentrationFill" class="concentration-fill" style="width: 100%"></div>
+      </div>
+    </div>
+    
+    <div class="message-container">
+      <div id="message" class="message high">Prêt à vous concentrer ?</div>
+    </div>
+    
+    <div class="controls">
+      <button class="btn btn-secondary" id="pauseBtn" disabled>
+        <span>Pause</span>
+      </button>
+      <button class="btn btn-danger" id="resetBtn" disabled>
+        <span>Réinitialiser</span>
+      </button>
+    </div>
+    
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-value" id="sessionsCompleted">0</div>
+        <div class="stat-label">Sessions</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="focusLost">0</div>
+        <div class="stat-label">Pertes</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="totalTime">0</div>
+        <div class="stat-label">Minutes</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Variables globales
+    let totalTime = 0;
+    let remainingTime = 0;
+    let concentration = 100;
+    let interval;
+    let lostFocusCount = 0;
+    let sessionsCompleted = 0;
+    let totalMinutes = 0;
+    let isPaused = false;
+    let isRunning = false;
+    let isDarkMode = false;
+
+    // Éléments DOM
+    const timerEl = document.getElementById('timer');
+    const concentrationValueEl = document.getElementById('concentrationValue');
+    const concentrationFillEl = document.getElementById('concentrationFill');
+    const messageEl = document.getElementById('message');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const themeToggle = document.getElementById('themeToggle');
+    const sessionsCompletedEl = document.getElementById('sessionsCompleted');
+    const focusLostEl = document.getElementById('focusLost');
+    const totalTimeEl = document.getElementById('totalTime');
+
+    // Fonction pour formater le temps
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const s = (seconds % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
     }
-  }, 1000);
-}
 
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    lostFocusCount++;
-    concentration -= 10;
-    if (concentration < 0) concentration = 0;
-    concentrationEl.textContent = `Concentration : ${concentration}%`;
-    updateMessage();
-  }
-});
+    // Fonction pour mettre à jour le message
+    function updateMessage() {
+      messageEl.className = 'message';
+      
+      if (concentration > 80) {
+        messageEl.textContent = "Super concentré, continue comme ça !";
+        messageEl.classList.add('high');
+      } else if (concentration > 60) {
+        messageEl.textContent = "Attention, tu perds un peu de concentration...";
+        messageEl.classList.add('medium');
+      } else if (concentration > 40) {
+        messageEl.textContent = "Tu te déconcentres beaucoup, recentre-toi !";
+        messageEl.classList.add('medium');
+      } else {
+        messageEl.textContent = "Oh non, tu as presque perdu toute ta concentration !";
+        messageEl.classList.add('low');
+      }
+    }
 
-startBtn.addEventListener('click', startFocus);
-</script>
+    // Fonction pour démarrer le timer
+    function startFocus() {
+      const minutes = parseInt(document.getElementById('focusTime').value);
+      if (isNaN(minutes) || minutes <= 0) {
+        alert("Veuillez entrer un nombre valide de minutes !");
+        return;
+      }
+      
+      totalTime = minutes * 60;
+      remainingTime = totalTime;
+      concentration = 100;
+      lostFocusCount = 0;
+      isRunning = true;
+      isPaused = false;
+      
+      timerEl.textContent = formatTime(remainingTime);
+      concentrationValueEl.textContent = `${concentration}%`;
+      concentrationFillEl.style.width = `${concentration}%`;
+      updateMessage();
+      
+      startBtn.disabled = true;
+      pauseBtn.disabled = false;
+      resetBtn.disabled = false;
+      
+      interval = setInterval(() => {
+        if (!isPaused) {
+          remainingTime--;
+          timerEl.textContent = formatTime(remainingTime);
+          
+          if (remainingTime <= 0) {
+            clearInterval(interval);
+            messageEl.textContent = "Session terminée ! Bravo !";
+            messageEl.className = 'message high';
+            sessionsCompleted++;
+            totalMinutes += minutes;
+            sessionsCompletedEl.textContent = sessionsCompleted;
+            totalTimeEl.textContent = totalMinutes;
+            resetTimer();
+          }
+        }
+      }, 1000);
+    }
 
+    // Fonction pour mettre en pause/reprendre
+    function togglePause() {
+      isPaused = !isPaused;
+      pauseBtn.innerHTML = isPaused ? '<span>Reprendre</span>' : '<span>Pause</span>';
+      messageEl.textContent = isPaused ? "Session en pause" : "Reprise de la session";
+    }
+
+    // Fonction pour réinitialiser le timer
+    function resetTimer() {
+      clearInterval(interval);
+      isRunning = false;
+      isPaused = false;
+      
+      const minutes = parseInt(document.getElementById('focusTime').value);
+      timerEl.textContent = formatTime(minutes * 60);
+      concentration = 100;
+      concentrationValueEl.textContent = `${concentration}%`;
+      concentrationFillEl.style.width = `${concentration}%`;
+      messageEl.textContent = "Prêt à vous concentrer ?";
+      messageEl.className = 'message high';
+      
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      resetBtn.disabled = true;
+      pauseBtn.innerHTML = '<span>Pause</span>';
+    }
+
+    // Fonction pour basculer entre les modes clair et sombre
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      document.body.classList.toggle('dark-mode', isDarkMode);
+      themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+    }
+
+    // Gestionnaire d'événement pour la perte de focus
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && isRunning && !isPaused) {
+        lostFocusCount++;
+        concentration -= 10;
+        if (concentration < 0) concentration = 0;
+        
+        concentrationValueEl.textContent = `${concentration}%`;
+        concentrationFillEl.style.width = `${concentration}%`;
+        focusLostEl.textContent = lostFocusCount;
+        
+        updateMessage();
+        
+        // Animation de pulsation pour indiquer la perte de concentration
+        document.querySelector('.concentration-container').classList.add('focus-lost');
+        setTimeout(() => {
+          document.querySelector('.concentration-container').classList.remove('focus-lost');
+        }, 500);
+      }
+    });
+
+    // Écouteurs d'événements
+    startBtn.addEventListener('click', startFocus);
+    pauseBtn.addEventListener('click', togglePause);
+    resetBtn.addEventListener('click', resetTimer);
+    themeToggle.addEventListener('click', toggleTheme);
+
+    // Initialisation
+    resetTimer();
+  </script>
 </body>
 </html>
